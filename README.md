@@ -45,7 +45,7 @@ AWS_ACCESS_KEY_ID to the aws access key and AWS_SECRET_KEY to the aws secure
 key. Then update context to be
 
 ```
-<bean id="propertyConfigurer" class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">
+<bean id="propertyConfigurer" class="org.longhorn.beanstalk.springintegration.config.S3PropertyPlaceholderConfigurer">
   <property name="locations">
     <list>
       <value>classpath:another.properties</value>
@@ -60,3 +60,49 @@ key. Then update context to be
 ```
 
 Noticed that you can use load properties files as before.
+
+## Load log4j properties from S3 Bucket
+
+Typically we will configure log4j for a web app in `web.xml` like this:
+
+```
+...
+<context-param>
+  <param-name>log4jConfiguration</param-name>
+  <param-value>/WEB-INF/log4j.properties</param-value>
+</context-param>
+<listener>
+  <listener-class>org.springframework.web.util.Log4jConfigListener</listener-class>
+</listener>
+...
+```
+To load same properties file from a s3 bucket `config/prod/log4j.properties`
+You need generate an IAM with aws access key id and secret key, and in 
+beanstalk > {you app} > {your environment} > configuration > container, set
+AWS_ACCESS_KEY_ID to the aws access key and AWS_SECRET_KEY to the aws secure
+key. Then update web.xml to
+
+
+```
+...
+<context-param>
+  <param-name>log4jConfiguration</param-name>
+  <param-value>/WEB-INF/log4j-fallback.properties</param-value>
+</context-param>
+<context-param>
+  <param-name>log4jS3Configuration</param-name>
+  <param-value>s3://config/prod/log4j.properties</param-value>
+</context-param>
+<listener>
+  <listener-class>org.longhorn.beanstalk.springintegration.config.Log4jS3ConfigListener</listener-class>
+</listener>
+...
+```
+
+if `log4jS3Configuration` has value, the `Log4jS3ConfigListener` will try to
+load log4j properties from s3 bucket, if it is not set or s3 bucket is not
+readable at the momenent, it will fall back to use log4j-fallback.properties
+as before.
+
+
+
