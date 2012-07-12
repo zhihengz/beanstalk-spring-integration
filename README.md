@@ -105,4 +105,7 @@ readable at the momenent, it will fall back to use log4j-fallback.properties
 as before.
 
 
+# Testing
+Test using the following command
 
+mvn clean test -DAWS_ACCESS_KEY_ID=[your aws accesskey] -DAWS_SECRET_KEY=[your aws secret key]
